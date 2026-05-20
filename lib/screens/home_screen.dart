@@ -8,6 +8,7 @@ import '../services/orion_service.dart';
 import '../services/android_actions.dart';
 import '../services/livekit_service.dart';
 import '../update_ui.dart';
+import '../widgets/waveform.dart';
 import 'settings_screen.dart';
 
 enum OrionState { idle, listening, processing, responding, offline }
@@ -371,26 +372,17 @@ class _HomeScreenState extends State<HomeScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Indicador de estado
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
+                  // Visualizador de áudio — reage à fala (sua e do Orion)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 48),
+                    child: OrionWaveform(
+                      level: () => _liveKit.activityLevel,
+                      active:
+                          _liveKit.isConnected ||
+                          _state == OrionState.listening,
                       color: _state == OrionState.offline
                           ? const Color(0xFF636366)
                           : const Color(0xFF00D4FF),
-                      boxShadow: _state != OrionState.offline
-                          ? [
-                              BoxShadow(
-                                color: const Color(
-                                  0xFF00D4FF,
-                                ).withValues(alpha: 0.6),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                              ),
-                            ]
-                          : null,
                     ),
                   ),
                   const SizedBox(height: 16),

@@ -71,6 +71,18 @@ class LiveKitService extends ChangeNotifier {
   bool get isConnected => state == OrionLiveKitState.connected;
   bool get isConnecting => state == OrionLiveKitState.connecting;
 
+  /// Nível de áudio atual (0..1) — o maior entre o seu microfone e o do Orion.
+  /// Alimenta o visualizador de onda. Retorna 0 quando desconectado.
+  double get activityLevel {
+    final room = _room;
+    if (room == null) return 0;
+    var level = room.localParticipant?.audioLevel ?? 0.0;
+    for (final p in room.remoteParticipants.values) {
+      if (p.audioLevel > level) level = p.audioLevel;
+    }
+    return level.clamp(0.0, 1.0);
+  }
+
   Future<void> loadActivationMode() async {
     final prefs = await SharedPreferences.getInstance();
     activationMode = OrionActivationMode.fromWire(
