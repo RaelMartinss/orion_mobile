@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd //c \"gradlew.bat :app:compileDebugKotlin -q\")",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(./gradlew :app:compileDebugKotlin)",
+      "Bash(flutter build *)",
+      "Bash(rm -f \"android/app/src/main/kotlin/br/com/orion/mobile/OrionAccessibilityService.kt\")",
+      "Bash(rm -f \"android/app/src/main/res/xml/accessibility_service_config.xml\")",
+      "Bash(rm -f \"lib/services/accessibility_service.dart\")",
+      "Bash(rmdir \"android/app/src/main/res/xml\")",
+      "Bash(ls android/app/src/main/res/xml)",
+      "Bash(flutter analyze *)",
+      "Bash(flutter pub *)",
+      "Bash(ls -la android/key.properties)",
+      "Bash(find android *)"
+    ]
+  }
+}

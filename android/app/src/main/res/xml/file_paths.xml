@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Diretório de cache temporário onde o APK da atualização é baixado -->
+    <cache-path name="cache" path="."/>
+    <external-cache-path name="external_cache" path="."/>
+</paths>
