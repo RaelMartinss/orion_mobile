@@ -26,7 +26,8 @@
       "Bash(ls android/app/src/main/res/mipmap-anydpi-v26/)",
       "Bash(ls android/app/src/main/res/values/colors.xml)",
       "Bash(grep -i \"ic_launcher\" android/app/src/main/res/values/colors.xml)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://api.github.com/repos/RaelMartinss/orion_mobile/releases/tags/v1.0.5\")"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://api.github.com/repos/RaelMartinss/orion_mobile/releases/tags/v1.0.5\")",
+      "Bash(dart run *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\raelmartins\\Documents\\obsidiana\\01 - Projetos\\orion_mobile_v2",

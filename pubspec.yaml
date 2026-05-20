@@ -27,6 +27,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
 
 flutter:
   uses-material-design: true
@@ -41,3 +42,15 @@ flutter_launcher_icons:
   min_sdk_android: 21
   adaptive_icon_background: "#000000"
   adaptive_icon_foreground: "assets/icon/orion.png"
+
+# Splash screen — tela de abertura com o ícone do Orion sobre fundo preto.
+# Depois de mexer aqui, rode: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0A0A0A"
+  image: assets/icon/orion.png
+  android: true
+  ios: false
+  web: false
+  android_12:
+    image: assets/icon/orion.png
+    color: "#0A0A0A"

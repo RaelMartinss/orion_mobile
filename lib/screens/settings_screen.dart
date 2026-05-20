@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/livekit_service.dart';
 import '../services/orion_service.dart';
@@ -19,11 +20,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _ghTokenCtrl = TextEditingController();
   OrionActivationMode _activationMode = OrionActivationMode.alwaysOpen;
   String _status = '';
+  String _versao = '';
 
   @override
   void initState() {
     super.initState();
     _carregarConfig();
+    _carregarVersao();
+  }
+
+  Future<void> _carregarVersao() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) {
+      setState(() => _versao = '${info.version} (build ${info.buildNumber})');
+    }
   }
 
   Future<void> _carregarConfig() async {
@@ -134,6 +144,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const Text(
               'Atualizações',
               style: TextStyle(color: Color(0xFF636366), letterSpacing: 1),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              _versao.isEmpty ? 'Orion' : 'Orion · versão $_versao',
+              style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 13),
             ),
             const SizedBox(height: 12),
             _campo('Repositório GitHub (owner/repo)', _repoCtrl),
