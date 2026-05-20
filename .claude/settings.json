@@ -28,7 +28,8 @@
       "Bash(grep -i \"ic_launcher\" android/app/src/main/res/values/colors.xml)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\raelmartins\\Documents\\obsidiana\\01 - Projetos\\orion_mobile_v2"
+      "C:\\Users\\raelmartins\\Documents\\obsidiana\\01 - Projetos\\orion_mobile_v2",
+      "C:\\Users\\raelmartins\\Documents\\orion_v2\\apps\\livekit-agent"
     ]
   }
 }

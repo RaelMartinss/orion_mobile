@@ -65,6 +65,9 @@ class LiveKitService extends ChangeNotifier {
   bool microphoneMuted = false;
   OrionActivationMode activationMode = OrionActivationMode.alwaysOpen;
 
+  /// Chamado quando o agente (Core) pede troca de modo via mensagem LiveKit.
+  void Function(OrionActivationMode mode)? onRemoteModeChange;
+
   bool get isConnected => state == OrionLiveKitState.connected;
   bool get isConnecting => state == OrionLiveKitState.connecting;
 
@@ -182,7 +185,8 @@ class LiveKitService extends ChangeNotifier {
           microphoneMuted = false;
           state = OrionLiveKitState.disconnected;
           notifyListeners();
-        });
+        })
+        ..on<DataReceivedEvent>((event) => _handleData(event.data));
 
       await room.connect(details.serverUrl, details.participantToken);
       _room = room;
@@ -227,6 +231,17 @@ class LiveKitService extends ChangeNotifier {
       state = OrionLiveKitState.disconnected;
     }
     notifyListeners();
+  }
+
+  /// Trata mensagens de dados vindas do agente (ex.: troca de modo de voz).
+  void _handleData(List<int> data) {
+    try {
+      final decoded = jsonDecode(utf8.decode(data));
+      if (decoded is Map && decoded['cmd'] == 'set_voice_mode') {
+        final mode = OrionActivationMode.fromWire(decoded['mode']?.toString());
+        onRemoteModeChange?.call(mode);
+      }
+    } catch (_) {}
   }
 
   Future<void> setMicrophoneMuted(bool muted) async {

@@ -48,11 +48,26 @@ class _HomeScreenState extends State<HomeScreen>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
     _liveKit.addListener(_onLiveKitChanged);
+    _liveKit.onRemoteModeChange = _onTrocaModoRemota;
     _init();
   }
 
   void _onLiveKitChanged() {
     if (mounted) setState(() {});
+  }
+
+  /// O agente (Core) pediu para trocar o modo de voz — salva e reconecta com a
+  /// flag nova. Espera um instante para o Orion terminar a confirmação falada.
+  Future<void> _onTrocaModoRemota(OrionActivationMode mode) async {
+    if (mode == _liveKit.activationMode) return;
+    await _liveKit.saveActivationMode(mode);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Modo de voz: ${mode.label}')),
+    );
+    await Future.delayed(const Duration(milliseconds: 1800));
+    if (!mounted) return;
+    await _aplicarModoAtivacao();
   }
 
   Future<void> _init() async {
