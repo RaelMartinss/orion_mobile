@@ -20,19 +20,20 @@ Future<void> checkAndPromptUpdate(
     return;
   }
 
-  final notes = update.notes.trim();
   final aceitar = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
       backgroundColor: const Color(0xFF1C1C1E),
       title: const Text(
-        'Atualização disponível',
+        'Atualização pronta para instalação',
         style: TextStyle(color: Colors.white),
       ),
       content: SingleChildScrollView(
         child: Text(
-          'Versão ${update.version} disponível.'
-          '${notes.isEmpty ? '' : '\n\n$notes'}',
+          'A versão ${update.version} do Orion está disponível.\n\n'
+          'Foram aplicadas melhorias internas, correções e otimizações '
+          'para uma resposta mais fluida do assistente.\n\n'
+          'Recomendo atualizar para manter o Orion na melhor versão.',
           style: const TextStyle(color: Color(0xFF8E8E93)),
         ),
       ),
@@ -40,7 +41,7 @@ Future<void> checkAndPromptUpdate(
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
           child: const Text(
-            'Agora não',
+            'Ignorar por enquanto',
             style: TextStyle(color: Color(0xFF8E8E93)),
           ),
         ),
@@ -50,7 +51,7 @@ Future<void> checkAndPromptUpdate(
             foregroundColor: Colors.black,
           ),
           onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('Atualizar'),
+          child: const Text('Atualizar Orion'),
         ),
       ],
     ),
