@@ -13,7 +13,19 @@
       "Bash(flutter analyze *)",
       "Bash(flutter pub *)",
       "Bash(ls -la android/key.properties)",
-      "Bash(find android *)"
+      "Bash(find android *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://api.github.com/repos/RaelMartinss/orion_mobile)",
+      "Bash(curl -s https://api.github.com/repos/RaelMartinss/orion_mobile/releases/latest -w \"\\\\nHTTP %{http_code}\\\\n\")",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://api.github.com/repos/RaelMartinss/orion_mobile/contents/android/app/orion-release.jks)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://api.github.com/repos/RaelMartinss/orion_mobile/contents/android/key.properties)",
+      "Bash(ls -la assets/icon/)",
+      "Bash(ls -la android/app/src/main/res/mipmap-xxxhdpi/)",
+      "Bash(ls android/app/src/main/res/mipmap-anydpi-v26/)",
+      "Bash(ls android/app/src/main/res/values/colors.xml)",
+      "Bash(grep -i \"ic_launcher\" android/app/src/main/res/values/colors.xml)"
     ]
   }
 }

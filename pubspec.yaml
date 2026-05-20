@@ -1,7 +1,7 @@
 name: orion_mobile
 description: "Orion Mobile — assistente de voz para Android"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.11.4
@@ -26,6 +26,18 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.1
 
 flutter:
   uses-material-design: true
+
+# Ícone do app — substitui o ícone padrão do Flutter.
+# Salve a arte escolhida (PNG 1024x1024) em assets/icon/orion.png e rode:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/orion.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/icon/orion.png"
