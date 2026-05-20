@@ -47,23 +47,12 @@ class _HomeScreenState extends State<HomeScreen>
     _pulseAnim = Tween<double>(begin: 1.0, end: 1.15).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-    _channel.setMethodCallHandler(_onNativeCall);
     _liveKit.addListener(_onLiveKitChanged);
     _init();
   }
 
   void _onLiveKitChanged() {
     if (mounted) setState(() {});
-  }
-
-  Future<dynamic> _onNativeCall(MethodCall call) async {
-    if (call.method == 'wakeWord') {
-      // Wake word "Orion" detectado em background — ativa o mic
-      if (_state == OrionState.idle || _state == OrionState.offline) {
-        await _tts.stop();
-        await _iniciarEscuta();
-      }
-    }
   }
 
   Future<void> _init() async {
@@ -74,34 +63,23 @@ class _HomeScreenState extends State<HomeScreen>
     } catch (_) {}
     await _initTts();
     await _initStt();
-    // Notificação é necessária para a barra do serviço de wake word (Android 13+)
-    await Permission.notification.request();
     await _liveKit.loadActivationMode();
     await _aplicarModoAtivacao();
     // Verifica se há versão nova no GitHub (falha em silêncio se offline)
     if (mounted) await checkAndPromptUpdate(context);
   }
 
-  /// Liga/desliga LiveKit e wake word conforme o modo de voz escolhido.
-  /// - Sempre aberto: o LiveKit conecta e transmite o microfone continuamente.
-  /// - Exigir Orion: o serviço de wake word escuta "Orion" em background e o
-  ///   LiveKit fica desligado para não disputar o microfone.
+  /// Os dois modos usam LiveKit. O modo escolhido vai como flag pro Core ao
+  /// conectar; em "Exigir Orion" o próprio agente fica em silêncio até ouvir
+  /// "Orion". Por isso aqui só garantimos a conexão (reconecta se já estava
+  /// conectado, para reaplicar o modo).
   Future<void> _aplicarModoAtivacao() async {
     final online = await _verificarConexao();
-    if (_liveKit.activationMode == OrionActivationMode.wakeWord) {
-      if (_liveKit.isConnected || _liveKit.isConnecting) {
-        await _liveKit.disconnect();
-      }
-      try {
-        await _channel.invokeMethod('startWakeWord');
-      } catch (_) {}
+    if (!online) return;
+    if (_liveKit.isConnected || _liveKit.isConnecting) {
+      await _liveKit.reconnect();
     } else {
-      try {
-        await _channel.invokeMethod('stopWakeWord');
-      } catch (_) {}
-      if (online && !_liveKit.isConnected && !_liveKit.isConnecting) {
-        await _liveKit.connect();
-      }
+      await _liveKit.connect();
     }
   }
 
@@ -136,7 +114,6 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _resetAfterNoSpeech() {
-    _channel.invokeMethod('resumeWakeWord').catchError((_) {});
     if (!mounted) return;
     setState(() {
       _state = OrionState.idle;
@@ -211,11 +188,6 @@ class _HomeScreenState extends State<HomeScreen>
       _setStatus('Microfone indisponível');
       return;
     }
-    // Pausa o serviço de wake word e aguarda liberar o mic
-    try {
-      await _channel.invokeMethod('pauseWakeWord');
-    } catch (_) {}
-    await Future.delayed(const Duration(milliseconds: 400));
 
     setState(() {
       _state = OrionState.listening;
@@ -241,9 +213,6 @@ class _HomeScreenState extends State<HomeScreen>
     if (texto.isNotEmpty) {
       _processarTexto(texto);
     } else {
-      try {
-        await _channel.invokeMethod('resumeWakeWord');
-      } catch (_) {}
       setState(() {
         _state = OrionState.idle;
         _statusText = 'Toque para falar';
@@ -267,11 +236,6 @@ class _HomeScreenState extends State<HomeScreen>
     });
 
     try {
-      // Retoma wake word ao finalizar o processamento
-      Future.delayed(const Duration(seconds: 3), () {
-        _channel.invokeMethod('resumeWakeWord').catchError((_) {});
-      });
-
       // Tenta ação local primeiro
       final acao = await AndroidActions.tentar(texto);
       if (acao.handled) {
@@ -366,14 +330,20 @@ class _HomeScreenState extends State<HomeScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Color(0xFF636366)),
-            onPressed: () =>
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                ).then((_) async {
-                  await _liveKit.loadActivationMode();
-                  await _aplicarModoAtivacao();
-                }),
+            onPressed: () async {
+              final modoAntes = _liveKit.activationMode;
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+              await _liveKit.loadActivationMode();
+              if (!mounted) return;
+              if (_liveKit.activationMode != modoAntes) {
+                await _aplicarModoAtivacao(); // modo mudou → reconecta com o novo flag
+              } else {
+                await _verificarConexao();
+              }
+            },
           ),
         ],
       ),
