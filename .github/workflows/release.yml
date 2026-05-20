@@ -1,0 +1,69 @@
+name: Release APK
+
+# Dispara quando você cria/empurra uma tag no formato vX.Y.Z (ex: v1.0.2)
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write # necessário para o workflow criar o Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # Recria o keystore e o key.properties a partir dos Secrets do repositório
+      - name: Restaurar keystore de assinatura
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/orion-release.jks
+          cat > android/key.properties <<EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=orion-release.jks
+          EOF
+
+      # A versão do app vem da própria tag (v1.0.2 -> 1.0.2), então você NÃO
+      # precisa mexer no pubspec: basta empurrar a tag.
+      - name: Extrair versão da tag
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Baixar dependências
+        run: flutter pub get
+
+      - name: Build dos APKs (release, por arquitetura)
+        run: >
+          flutter build apk --release --split-per-abi
+          --build-name=${{ steps.ver.outputs.version }}
+          --build-number=${{ github.run_number }}
+
+      - name: Publicar Release com os APKs
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
